@@ -1,1 +1,2 @@
-
+This Document contains the information of the contents of this project.
+The file "overview.pdf" contains the information about the project.
