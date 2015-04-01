@@ -5,7 +5,7 @@ import java.io.FileReader;
 public class GETAUDIO {    
 	
     public static void main(String[] args) throws Exception {
-  
+  	//entry point for the application
         BufferedReader read1 = new BufferedReader(new FileReader("read.txt"));
         String temp;
         int index = 0;
