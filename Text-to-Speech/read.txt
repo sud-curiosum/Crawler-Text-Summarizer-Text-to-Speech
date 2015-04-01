@@ -1,0 +1,163 @@
+last post here, we discussed about map reduce.
+said there too, no implementation was made 
+public by Google for this. Folks at Yahoo 
+came up with 
+Hadoop implemented map reduce paradigm using
+distributed file system called as 
+Hadoop Distributed File Systems (HDFS).
+In this post we will understand more 
+about internals of map reduce implementation 
+and resource allocation and scheduling 
+mechanism called as Yet Another Resource 
+Negotiator (YARN) 
+There are four basic function which 
+needs to be done in order to implement 
+the concept as listed below:
+1. Parallelize map function
+2. Transfer the data from map function 
+output to reduce input
+3. Parallelize reduce function
+4. Storage for : Map input, map output, 
+reduce input and reduce output.
+As we understood earlier, that map 
+function or mapper work on data 
+independent of each other, they 
+are very easy to parallelize. Next step
+is to transfer mapper output to reducer. 
+In order to have efficient reducer, records 
+with same keys are sent to same reducers. 
+As we will see later, these records 
+may be local to server where reducer 
+is running or may be remote to it. 
+Other way to distribute mapper 
+output is to use some partitioning 
+method like hashing.
+Now, since input required for reducer
+ is available to it independent of 
+ other reducers, they can also be 
+ parallelize very easily.
+To implement storage for input and 
+output of various stages, below is the table:
+Map input : From distributed 
+file system
+Map output : Local file system
+Reduce input : Local file system 
+Reduce output : Distributed file system.
+Local file system can be normal 
+operating system file sytem like 
+Linux FS. Example of distributed 
+file system are Google File System 
+(GFS) or Hadoop Distributed File 
+System (HDFS)
+Internal working of above can be 
+easily understood by figure below:
+Hadoop internal
+In figure above, we can see that 
+mappers and reducers need to run 
+on servers  (physical computing machines). 
+How this servers are assigned, 
+which application maps to which 
+server and how many instances of 
+these processes requires a robust 
+resource allocation and scheduling
+mechanism. In following text we will
+ talk very specific to Hadoop 
+ implementation of Map Reduce paradigm.
+Hadoop is used now a days in 
+industry for distributed processing 
+of humongous amount of data. It can 
+scale from a single node  or machine 
+to virtually thousands of nodes or 
+machines. In earlier versions of 
+resource allocation and scheduling 
+mechanisms in Hadoop, job scheduling
+and resource allocation was done by 
+single daemon. Hadoop cluster can be
+divided into two major blocks : The
+map reduce implementation and as 
+said above a distributed file system. 
+Figure shows high level architecture
+ of Hadoop cluster.
+Whenever a task is assigned by 
+cluster, job tracker selects the 
+server node which can most efficiently
+process the data, one of the criteria
+being proximity of server to data on
+which mapper or reducer has to do 
+processing. The node which is selected
+is called as slave node and has task
+tracker which has multiple slots 
+to accommodate processes assigned to it.
+Communication is sent from 
+task tracker to to tracker when
+task assigned to it has been completed.
+Once all such task trackers give
+completion report to job tracker, 
+it informs client that job has been done.
+With above explanation of working,
+it is clear that each job needs to go
+through single daemon called job tracker
+which becomes bottle-neck, dampens the
+scalability and limits processing speed.
+To solve this problem of scalability, Hadoop
+came up with new implementation called as
+YARN : Yet Another Resource Negotiator or
+MRv2 So how does it overcomes shortcomings
+of above implementation? This is what
+mentioned on official Apache Hadoop
+website The fundamental idea 
+of MRv2 is to split up the two 
+major functionalities of the 
+JobTracker, resource management
+and job scheduling/monitoring, 
+into separate daemons. The idea
+is to have a global ResourceManager
+(RM) and per-application ApplicationMaster
+(AM). An application is either a single
+job in the classical sense of Map-Reduce
+jobs or a DAG of jobs. 
+Pre-YARN implementation where more like
+operating systems which can run same kind 
+of application, that application being 
+'map reduce'. YARN is kind of distributed 
+operating system which can run various kind 
+of applications also called as 
+multi-tenancy. Although YARN maintains 
+backward compatible with MRv1 supporting 
+map reduce APIs however it can do much 
+more than that, and you can develop your 
+distributed applications in any language 
+you want and run it on YARN. It gets rid 
+of the requirement to keep separation 
+between map reduce and other known 
+complex distributed application frameworks.
+Below is figure of YARN, each component 
+explained yarn architecture
+Resource manager and node managers
+form the data computation part 
+of the framework. resource manager 
+arbitrates resources among all stakeholders. 
+Resource manager has two parts to it : 
+Scheduling and application manager. 
+Scheduler is allocates resources to 
+various application based on capacity 
+and limitations of system. It also 
+implements queue and other required mechanisms.
+Application manager accepts jobs which 
+are submitted by various clients, negotiates 
+containers who can execute those jobs 
+(Container here means some machine with 
+processing power and storage).
+Node manager is machine level entity 
+which monitors machine level stats like 
+CPU, memory etc and containers and sends 
+them back to resource manager.
+Application manager is per task library 
+which request resources from resource 
+manager and works with node managers 
+to execute and monitor tasks.This 
+also detect task failures for a job.
+I have tried to explain concept 
+of YARN, please share your views 
+if something is missing or wrong.
+And sharing is caring :)
